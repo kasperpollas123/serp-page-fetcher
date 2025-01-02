@@ -1,8 +1,6 @@
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
-import gzip
-import io
 
 # Oxylabs residential proxy endpoint
 PROXY_ENDPOINT = "https://customer-kasperpollas_EImZC-cc-us:L6mFKak8Uz286dC+@pr.oxylabs.io:7777"
@@ -30,19 +28,8 @@ def fetch_google_serp(url):
             content_encoding = response.headers.get("Content-Encoding", "None")
             st.write(f"**Content-Encoding:** {content_encoding}")
             
-            # Handle decompression manually if the response is compressed
-            response_text = None
-            if content_encoding == "gzip":
-                try:
-                    # Attempt to decompress the response content
-                    decompressed_content = gzip.decompress(response.content)
-                    response_text = decompressed_content.decode("utf-8")
-                except gzip.BadGzipFile:
-                    # If decompression fails, use the raw response
-                    st.write("**Warning:** Response is not a valid gzip file. Using raw response.")
-                    response_text = response.text
-            else:
-                response_text = response.text
+            # Use the raw response (proxy has already decompressed it)
+            response_text = response.text
             
             # Compare the size of the raw response and decompressed response
             raw_size = len(response.content)  # Size of the raw response (compressed)
