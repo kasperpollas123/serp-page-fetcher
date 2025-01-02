@@ -24,6 +24,16 @@ def fetch_google_serp(url):
         
         # Check if the request was successful
         if response.status_code == 200:
+            # Verify if the response is compressed
+            content_encoding = response.headers.get("Content-Encoding", "None")
+            st.write(f"**Content-Encoding:** {content_encoding}")
+            
+            # Compare the size of the raw response and decompressed response
+            raw_size = len(response.content)  # Size of the raw response (compressed)
+            decompressed_size = len(response.text)  # Size of the decompressed response
+            st.write(f"**Raw Response Size (Compressed):** {raw_size} bytes")
+            st.write(f"**Decompressed Response Size:** {decompressed_size} bytes")
+            
             # Parse the HTML content using BeautifulSoup
             soup = BeautifulSoup(response.text, 'html.parser')
             
