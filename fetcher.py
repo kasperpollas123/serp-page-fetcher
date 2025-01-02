@@ -14,8 +14,13 @@ def fetch_google_serp(url):
             "https": PROXY_ENDPOINT,
         }
         
+        # Add headers for compression
+        headers = {
+            "Accept-Encoding": "gzip, deflate"
+        }
+        
         # Send a GET request to the Google SERP URL through the proxy
-        response = requests.get(url, proxies=proxies)
+        response = requests.get(url, proxies=proxies, headers=headers)
         
         # Check if the request was successful
         if response.status_code == 200:
