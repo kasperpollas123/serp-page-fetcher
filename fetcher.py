@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 PROXY_ENDPOINT = "https://customer-kasperpollas_EImZC-cc-us:L6mFKak8Uz286dC+@pr.oxylabs.io:7777"
 
 # Function to fetch and parse Google SERP
-def fetch_google_serp(url):
+def fetch_google_serp(url, limit=5):
     try:
         # Set up the proxy
         proxies = {
@@ -25,8 +25,8 @@ def fetch_google_serp(url):
             # List to store results
             results = []
             
-            # Find all search result containers
-            for result in soup.find_all('div', class_='Gx5Zad xpd EtOod pkphOe'):
+            # Find all search result containers and limit to top `limit` results
+            for result in soup.find_all('div', class_='Gx5Zad xpd EtOod pkphOe')[:limit]:
                 # Skip ads (check for ad-related classes or attributes)
                 if "ads" in result.get("class", []):  # Example: Skip elements with "ads" in their class list
                     continue
@@ -62,8 +62,8 @@ serp_url = st.text_input("Enter Google SERP URL (e.g., https://www.google.com/se
 # Button to trigger the fetch
 if st.button("Fetch SERP"):
     if serp_url:
-        # Fetch the SERP content
-        results = fetch_google_serp(serp_url)
+        # Fetch the SERP content (limit to top 5 results)
+        results = fetch_google_serp(serp_url, limit=5)
         
         # Display the results
         if isinstance(results, list):
