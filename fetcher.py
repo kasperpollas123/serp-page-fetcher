@@ -2,20 +2,9 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 import time
-import random
 
 # Oxylabs residential proxy endpoint
 PROXY_ENDPOINT = "https://customer-kasperpollas_EImZC-cc-us:L6mFKak8Uz286dC+@pr.oxylabs.io:7777"
-
-# List of user-agents to rotate
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15",
-    "Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
-    # Add more user-agents here
-]
 
 # Function to fetch and parse Google SERP
 def fetch_google_serp(url, limit=5, retries=3):
@@ -30,14 +19,6 @@ def fetch_google_serp(url, limit=5, retries=3):
                 "https": PROXY_ENDPOINT,
             }
             
-            # Rotate user-agent and add additional headers
-            headers = {
-                "User-Agent": random.choice(USER_AGENTS),
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.5",
-                "Referer": "https://www.google.com/",
-            }
-            
             # Use a fresh session for each request
             session = requests.Session()
             
@@ -46,7 +27,7 @@ def fetch_google_serp(url, limit=5, retries=3):
             session.auth = (PROXY_ENDPOINT.split('://')[1].split('@')[0].split(':')[0], PROXY_ENDPOINT.split('://')[1].split('@')[0].split(':')[1])
             
             # Send a GET request to the Google SERP URL through the proxy
-            response = session.get(url, proxies=proxies, headers=headers)
+            response = session.get(url, proxies=proxies)
             
             # Check if the request was successful
             if response.status_code == 200:
