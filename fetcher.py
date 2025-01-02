@@ -14,31 +14,13 @@ def fetch_google_serp(url):
             "https": PROXY_ENDPOINT,
         }
         
-        # Add headers for compression
-        headers = {
-            "Accept-Encoding": "gzip, deflate"
-        }
-        
         # Send a GET request to the Google SERP URL through the proxy
-        response = requests.get(url, proxies=proxies, headers=headers)
+        response = requests.get(url, proxies=proxies)
         
         # Check if the request was successful
         if response.status_code == 200:
-            # Verify if the response is compressed
-            content_encoding = response.headers.get("Content-Encoding", "None")
-            st.write(f"**Content-Encoding:** {content_encoding}")
-            
-            # Use the raw response (proxy has already decompressed it)
-            response_text = response.text
-            
-            # Compare the size of the raw response and decompressed response
-            raw_size = len(response.content)  # Size of the raw response (compressed)
-            decompressed_size = len(response_text)  # Size of the decompressed response
-            st.write(f"**Raw Response Size (Compressed):** {raw_size} bytes")
-            st.write(f"**Decompressed Response Size:** {decompressed_size} bytes")
-            
             # Parse the HTML content using BeautifulSoup
-            soup = BeautifulSoup(response_text, 'html.parser')
+            soup = BeautifulSoup(response.text, 'html.parser')
             
             # List to store results
             results = []
