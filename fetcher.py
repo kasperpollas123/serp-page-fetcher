@@ -31,15 +31,16 @@ def fetch_google_serp(url, limit=5):
                 if "ads" in result.get("class", []):  # Example: Skip elements with "ads" in their class list
                     continue
                 
-                # Extract the title
-                title_element = result.find('h3') or result.find('h2')
-                title = title_element.get_text() if title_element else "No Title Found"
+                # Extract the title (try multiple possible tags and classes)
+                title_element = result.find('h3') or result.find('h2') or result.find('div', class_='BNeawe vvjwJb AP7Wnd')
+                title = title_element.get_text().strip() if title_element else "No Title Found"
                 
-                # Extract the description
+                # Extract the description (try multiple possible classes)
                 description_element = result.find('div', class_='BNeawe s3v9rd AP7Wnd') or \
                                      result.find('div', class_='v9i61e') or \
-                                     result.find('div', class_='BNeawe UPmit AP7Wnd lRVwie')
-                description = description_element.get_text() if description_element else "No Description Found"
+                                     result.find('div', class_='BNeawe UPmit AP7Wnd lRVwie') or \
+                                     result.find('div', class_='BNeawe s3v9rd AP7Wnd')
+                description = description_element.get_text().strip() if description_element else "No Description Found"
                 
                 # Append the result as a dictionary
                 results.append({
