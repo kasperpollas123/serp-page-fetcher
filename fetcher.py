@@ -6,42 +6,44 @@ from bs4 import BeautifulSoup
 PROXY_ENDPOINT = "https://customer-kasperpollas_EImZC-cc-us:L6mFKak8Uz286dC+@pr.oxylabs.io:7777"
 
 # Function to fetch and parse Google SERP
-def fetch_google_serp(url):
+def fetch_google_serp(url, limit=5):
     try:
         # Set up the proxy
         proxies = {
             "http": PROXY_ENDPOINT,
             "https": PROXY_ENDPOINT,
         }
-        
+        # Add headers for compression and mobile user-agent
+        headers = {
+            "Accept-Encoding": "gzip, deflate",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+        }
         # Send a GET request to the Google SERP URL through the proxy
-        response = requests.get(url, proxies=proxies)
+        response = requests.get(url, proxies=proxies, headers=headers)
         
         # Check if the request was successful
         if response.status_code == 200:
             # Parse the HTML content using BeautifulSoup
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, 'lxml')
             
             # List to store results
             results = []
             
             # Find all search result containers
-            for result in soup.find_all('div', class_='Gx5Zad xpd EtOod pkphOe'):
+            for result in soup.find_all('div', class_='Gx5Zad xpd EtOod pkphOe')[:limit]:
+                # Skip ads
+                if "ads" in result.get("class", []):
+                    continue
                 # Extract the title
                 title_element = result.find('h3') or result.find('h2')
                 title = title_element.get_text() if title_element else "No Title Found"
-                
                 # Extract the description
                 description_element = result.find('div', class_='BNeawe s3v9rd AP7Wnd') or \
                                      result.find('div', class_='v9i61e') or \
                                      result.find('div', class_='BNeawe UPmit AP7Wnd lRVwie')
                 description = description_element.get_text() if description_element else "No Description Found"
-                
                 # Append the result as a dictionary
-                results.append({
-                    "title": title,
-                    "description": description
-                })
+                results.append({"title": title, "description": description})
             
             return results
         else:
@@ -59,9 +61,7 @@ serp_url = st.text_input("Enter Google SERP URL (e.g., https://www.google.com/se
 if st.button("Fetch SERP"):
     if serp_url:
         # Fetch the SERP content
-        results = fetch_google_serp(serp_url)
-        
-        # Display the results
+        results = fetch_google_serp(serp_url, limit=5)  # Fetch only 5 results
         if isinstance(results, list):
             st.subheader("Search Results:")
             for i, result in enumerate(results, start=1):
