@@ -19,8 +19,8 @@ def fetch_google_serp(url):
         
         # Check if the request was successful
         if response.status_code == 200:
-            # Parse the HTML content using BeautifulSoup
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # Parse the HTML content using BeautifulSoup with the lxml parser
+            soup = BeautifulSoup(response.text, 'lxml')
             
             # List to store results
             results = []
