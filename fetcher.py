@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
-import time
 from requests.exceptions import ProxyError
 
 # Oxylabs residential proxy endpoint
@@ -11,9 +10,6 @@ PROXY_ENDPOINT = "https://customer-kasperpollas_EImZC-cc-us:L6mFKak8Uz286dC+@pr.
 def fetch_google_serp(url, limit=5, retries=3):
     for attempt in range(retries):
         try:
-            # Add a delay between requests
-            time.sleep(5)  # Wait 5 seconds before making the request
-            
             # Set up the proxy
             proxies = {
                 "http": PROXY_ENDPOINT,
@@ -58,9 +54,12 @@ def fetch_google_serp(url, limit=5, retries=3):
             else:
                 return f"Error: Unable to fetch the page. Status code: {response.status_code}"
         except ProxyError as e:
-            st.write(f"Proxy error occurred: {e}. Retrying... (Attempt {attempt + 1}/{retries})")
-            time.sleep(10)  # Wait 10 seconds before retrying
-            continue
+            if attempt < retries - 1:  # Don't delay on the last attempt
+                st.write(f"Proxy error occurred: {e}. Retrying... (Attempt {attempt + 1}/{retries})")
+                time.sleep(5)  # Wait 5 seconds before retrying
+                continue
+            else:
+                return f"Proxy error occurred: {e}. Max retries reached."
         except Exception as e:
             return f"An error occurred: {e}"
     return "Error: Max retries reached. Unable to fetch the page."
