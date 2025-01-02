@@ -22,20 +22,32 @@ def fetch_google_serp(url):
             # Parse the HTML content using BeautifulSoup
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Extract the title of the page
-            title = soup.title.string if soup.title else "No Title Found"
+            # List to store results
+            results = []
             
-            # Extract descriptions (meta descriptions or snippets from search results)
-            descriptions = []
-            # Google SERP descriptions are often in <div> tags with specific classes
-            for desc in soup.find_all('div', class_='BNeawe s3v9rd AP7Wnd'):
-                descriptions.append(desc.get_text())
+            # Find all search result containers
+            for result in soup.find_all('div', class_='Gx5Zad xpd EtOod pkphOe'):
+                # Extract the title
+                title_element = result.find('h3') or result.find('h2')
+                title = title_element.get_text() if title_element else "No Title Found"
+                
+                # Extract the description
+                description_element = result.find('div', class_='BNeawe s3v9rd AP7Wnd') or \
+                                     result.find('div', class_='v9i61e') or \
+                                     result.find('div', class_='BNeawe UPmit AP7Wnd lRVwie')
+                description = description_element.get_text() if description_element else "No Description Found"
+                
+                # Append the result as a dictionary
+                results.append({
+                    "title": title,
+                    "description": description
+                })
             
-            return title, descriptions
+            return results
         else:
-            return f"Error: Unable to fetch the page. Status code: {response.status_code}", []
+            return f"Error: Unable to fetch the page. Status code: {response.status_code}"
     except Exception as e:
-        return f"An error occurred: {e}", []
+        return f"An error occurred: {e}"
 
 # Streamlit UI
 st.title("Google SERP Fetcher")
@@ -47,15 +59,17 @@ serp_url = st.text_input("Enter Google SERP URL (e.g., https://www.google.com/se
 if st.button("Fetch SERP"):
     if serp_url:
         # Fetch the SERP content
-        title, descriptions = fetch_google_serp(serp_url)
+        results = fetch_google_serp(serp_url)
         
-        # Display the title
-        st.subheader("Title:")
-        st.write(title)
-        
-        # Display the descriptions
-        st.subheader("Descriptions:")
-        for desc in descriptions:
-            st.write(desc)
+        # Display the results
+        if isinstance(results, list):
+            st.subheader("Search Results:")
+            for i, result in enumerate(results, start=1):
+                st.write(f"**Result {i}**")
+                st.write(f"**Title:** {result['title']}")
+                st.write(f"**Description:** {result['description']}")
+                st.write("---")
+        else:
+            st.error(results)  # Display error message if any
     else:
         st.warning("Please enter a valid Google SERP URL.")
