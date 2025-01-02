@@ -27,6 +27,10 @@ def fetch_google_serp(url):
             
             # Find all search result containers
             for result in soup.find_all('div', class_='Gx5Zad xpd EtOod pkphOe'):
+                # Skip ads (check for ad-related classes or attributes)
+                if "ads" in result.get("class", []):  # Example: Skip elements with "ads" in their class list
+                    continue
+                
                 # Extract the title
                 title_element = result.find('h3') or result.find('h2')
                 title = title_element.get_text() if title_element else "No Title Found"
