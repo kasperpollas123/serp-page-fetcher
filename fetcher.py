@@ -31,10 +31,16 @@ def fetch_google_serp(url):
             st.write(f"**Content-Encoding:** {content_encoding}")
             
             # Handle decompression manually if the response is compressed
+            response_text = None
             if content_encoding == "gzip":
-                # Decompress the response content
-                decompressed_content = gzip.decompress(response.content)
-                response_text = decompressed_content.decode("utf-8")
+                try:
+                    # Attempt to decompress the response content
+                    decompressed_content = gzip.decompress(response.content)
+                    response_text = decompressed_content.decode("utf-8")
+                except gzip.BadGzipFile:
+                    # If decompression fails, use the raw response
+                    st.write("**Warning:** Response is not a valid gzip file. Using raw response.")
+                    response_text = response.text
             else:
                 response_text = response.text
             
