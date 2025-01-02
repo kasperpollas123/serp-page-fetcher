@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
+import time
 from requests.exceptions import ProxyError
 
 # Oxylabs residential proxy endpoint
@@ -16,8 +17,12 @@ def fetch_google_serp(url, limit=5, retries=3):
                 "https": PROXY_ENDPOINT,
             }
             
+            # Use a fresh session for each request and clear cookies
+            session = requests.Session()
+            session.cookies.clear()  # Clear cookies
+            
             # Send a GET request to the Google SERP URL through the proxy
-            response = requests.get(url, proxies=proxies)
+            response = session.get(url, proxies=proxies)
             
             # Check if the request was successful
             if response.status_code == 200:
@@ -51,6 +56,13 @@ def fetch_google_serp(url, limit=5, retries=3):
                     })
                 
                 return results
+            elif response.status_code == 429:
+                if attempt < retries - 1:  # Don't delay on the last attempt
+                    st.write(f"Rate limit exceeded. Retrying... (Attempt {attempt + 1}/{retries})")
+                    time.sleep(10)  # Wait 10 seconds before retrying
+                    continue
+                else:
+                    return f"Error: Unable to fetch the page. Status code: {response.status_code}"
             else:
                 return f"Error: Unable to fetch the page. Status code: {response.status_code}"
         except ProxyError as e:
