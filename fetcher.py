@@ -38,9 +38,12 @@ def fetch_google_serp(url, limit=5, retries=3):
                 "Referer": "https://www.google.com/",
             }
             
-            # Use a fresh session for each request and clear cookies
+            # Use a fresh session for each request
             session = requests.Session()
-            session.cookies.clear()  # Clear cookies
+            
+            # Clear cookies except for proxy authentication
+            session.cookies.clear()  # Clear all cookies
+            session.auth = (PROXY_ENDPOINT.split('://')[1].split('@')[0].split(':')[0], PROXY_ENDPOINT.split('://')[1].split('@')[0].split(':')[1])
             
             # Send a GET request to the Google SERP URL through the proxy
             response = session.get(url, proxies=proxies, headers=headers)
